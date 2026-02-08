@@ -1,0 +1,25 @@
+# Dados grandes - JSONs das notícias
+983json/
+*.json
+!fraud_detection_results.json
+
+# CSVs intermediários
+fraud_news_FROM_LOG.csv
+fraud_news_with_companies.csv
+
+# Logs
+*.log
+fraud_detection.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+
+# Arquivos temporários
+*.tmp
+*.swp
+update_log_csv.py
+create_resume_json.py
