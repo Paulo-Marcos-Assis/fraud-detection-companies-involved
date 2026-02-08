@@ -1,8 +1,4 @@
-# 🔍 Fraud Detection Dataset
-
-Sistema de análise de fraudes empresariais em notícias usando LLM (Large Language Model).
-
-## 📋 Descrição
+# Fraud Detection Companies Involved 
 
 Este projeto processa 983 notícias de portais brasileiros para identificar casos de fraude empresarial, extraindo informações estruturadas como:
 
@@ -12,7 +8,6 @@ Este projeto processa 983 notícias de portais brasileiros para identificar caso
 - Nível de confiança da detecção
 - Tempo de processamento
 
-## 🚀 Como Usar
 
 ### Pré-requisitos
 
@@ -29,17 +24,12 @@ export OLLAMA_HOST="https://ollama-dev.ceos.ufsc.br"
 export OLLAMA_MODEL="gpt-oss:20b"
 ```
 
-### Executar Análise
-
 ```bash
 # Executar script principal
 bash executar.sh
 
 # Ou manualmente
 python3 main.py
-```
-
-### Acompanhar Progresso
 
 ```bash
 # Ver logs em tempo real
@@ -49,14 +39,14 @@ tail -f fraud_detection.log
 ps aux | grep "python3.*main.py"
 ```
 
-## 📊 Arquivos Gerados
+## Arquivos Gerados
 
 - `fraud_detection_results.json` - Resultados completos em JSON
 - `fraud_news_with_companies_COMPLETE.csv` - CSV com notícias que mencionam empresas
 - `performance_metrics.json` - Métricas de performance
 - `fraud_detection.log` - Log de execução
 
-## 🔧 Scripts Auxiliares
+## Scripts Auxiliares
 
 ### `fill_missing_fields.py`
 Preenche campos vazios (title, url, text) no CSV usando os JSONs originais.
@@ -79,7 +69,7 @@ Extrai CSV de resultados parciais do JSON.
 python3 extract_partial_csv.py
 ```
 
-## ⚙️ Configurações
+## Configurações
 
 ### Parâmetros Principais (main.py)
 
@@ -97,7 +87,7 @@ O prompt instrui o LLM a:
 5. Identificar pessoas envolvidas com seus papéis
 6. Diferenciar claramente empresas de pessoas
 
-## 📁 Estrutura de Dados
+## Estrutura de Dados
 
 ### CSV de Saída
 ```csv
@@ -105,23 +95,7 @@ file,title,url,text,companies,people,fraud_types,confidence,execution_time_secon
 noticia_0001.json,"Título","URL","Texto","Empresa A; Empresa B","João Silva (empresário); Maria Costa (prefeita)","fraude em licitação; corrupção",alta,5.23
 ```
 
-## 🎯 Funcionalidades
-
-- ✅ Detecção automática de fraudes usando LLM
-- ✅ Extração de entidades (empresas e pessoas)
-- ✅ Timeout por notícia (evita travamentos)
-- ✅ Salvamento incremental (a cada 25 notícias)
-- ✅ Modo retomada (continua de onde parou)
-- ✅ Métricas de performance detalhadas
-- ✅ Logs estruturados
-
-## 📈 Performance
-
-- **Tempo médio por notícia:** ~2-3 segundos
-- **Total estimado (983 notícias):** ~40-50 minutos
-- **Modelo LLM:** gpt-oss:20b (Ollama)
-
-## 🔬 Metodologia
+## Metodologia
 
 O sistema usa um LLM (Large Language Model) para análise semântica das notícias, identificando padrões de fraude empresarial através de:
 
@@ -130,6 +104,6 @@ O sistema usa um LLM (Large Language Model) para análise semântica das notíci
 3. **Classificação de tipos de fraude** baseada em taxonomia pré-definida
 4. **Avaliação de confiança** baseada na clareza das evidências no texto
 
-## 📄 Licença
+## Licença
 
 Este projeto é parte de pesquisa acadêmica da UFSC.
