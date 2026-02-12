@@ -1,0 +1,26 @@
+{
+  "model": "gpt-oss:20b",
+  "ollama_host": "https://ollama-dev.ceos.ufsc.br",
+  "temperature": 0,
+  "timestamp": "2026-01-28T13:31:47.173816",
+  "processing_summary": {
+    "total_news_processed": 550,
+    "total_fraud_detected": 392,
+    "total_with_companies_or_people": 181,
+    "fraud_detection_rate": 71.27,
+    "companies_people_identification_rate": 46.17
+  },
+  "execution_metrics": {
+    "total_time_seconds": 5579.49,
+    "total_time_minutes": 92.99,
+    "average_time_per_news": 14.23,
+    "min_time_seconds": 2.84,
+    "max_time_seconds": 86.89,
+    "median_time_seconds": 7.97
+  },
+  "confidence_distribution": {
+    "alta": 332,
+    "média": 52,
+    "baixa": 3
+  }
+}

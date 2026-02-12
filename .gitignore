@@ -1,7 +1,10 @@
 # Dados grandes - JSONs das notícias
 983json/
+dataset_building/
+dataset_building/**/*
 *.json
 !fraud_detection_results.json
+!performance_metrics.json
 
 # CSVs intermediários
 fraud_news_FROM_LOG.csv

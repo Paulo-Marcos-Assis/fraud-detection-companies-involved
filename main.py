@@ -13,10 +13,15 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama-dev.ceos.ufsc.br")
 SELECTED_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
 LLM_TEMPERATURE = 0
 TIMEOUT_SECONDS = 180  # Timeout de 180 segundos por notícia
-START_FROM = 434  # Começar da notícia 434 (pular 1-433 já processadas)
+START_FROM = 108518  # Última processada: 108517 (12/fev/2026 18:42) - Retomar daqui
+MAX_CONSECUTIVE_403_ERRORS = 5  # Parar após 5 erros 403 consecutivos
 
 class TimeoutError(Exception):
     """Exceção lançada quando o processamento excede o timeout"""
+    pass
+
+class OllamaError403(Exception):
+    """Exceção lançada quando Ollama retorna erro 403"""
     pass
 
 def timeout_handler(signum, frame):
@@ -189,6 +194,11 @@ Responda APENAS com o JSON válido, sem texto adicional.
             return default_return
         except Exception as e:
             signal.alarm(0)  # Cancelar timeout
+            error_msg = str(e)
+            # Verificar se é erro 403
+            if "403" in error_msg or "Forbidden" in error_msg:
+                print(f"[❌ ERRO 403] Ollama retornou erro de permissão: {error_msg}")
+                raise OllamaError403(f"Erro 403 do Ollama: {error_msg}")
             print(f"[Erro na Análise] {e}")
             execution_time = time.time() - start_time
             default_return["execution_time_seconds"] = round(execution_time, 2)
@@ -333,14 +343,12 @@ def process_all_news(input_dir: str, output_file: str, csv_file: str, metrics_fi
     processed = len(already_processed)
     skipped = 0
     timeouts = 0
+    consecutive_403_errors = 0  # Contador de erros 403 consecutivos
     SAVE_INTERVAL = 25
     
-    for json_file in json_files:
-        # Extrair número da notícia
-        try:
-            news_number = int(json_file.stem.split('_')[1])
-        except:
-            news_number = 0
+    for index, json_file in enumerate(json_files, start=1):
+        # Usar índice na lista ordenada como "número da notícia"
+        news_number = index
         
         # Pular se antes do START_FROM
         if START_FROM > 0 and news_number < START_FROM:
@@ -364,7 +372,39 @@ def process_all_news(input_dir: str, output_file: str, csv_file: str, metrics_fi
             
             print(f"[{news_number}/{total_files}] Processando: {json_file.name}...")
             
-            result = detector.analyze_fraud(text, title, timeout=TIMEOUT_SECONDS)
+            try:
+                result = detector.analyze_fraud(text, title, timeout=TIMEOUT_SECONDS)
+                # Resetar contador de 403 em caso de sucesso
+                consecutive_403_errors = 0
+            except OllamaError403 as e403:
+                consecutive_403_errors += 1
+                print(f"⚠️  Erro 403 consecutivo #{consecutive_403_errors}/{MAX_CONSECUTIVE_403_ERRORS}")
+                
+                if consecutive_403_errors >= MAX_CONSECUTIVE_403_ERRORS:
+                    print(f"\n{'='*70}")
+                    print(f"🛑 INTERROMPENDO PROCESSAMENTO")
+                    print(f"   Motivo: {MAX_CONSECUTIVE_403_ERRORS} erros 403 consecutivos do Ollama")
+                    print(f"   Última notícia processada: {json_file.name}")
+                    print(f"   Total processadas até agora: {processed}")
+                    print(f"{'='*70}\n")
+                    
+                    # Salvar progresso antes de parar
+                    output_path = Path(output_file)
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        json.dump({
+                            "total_processed": processed,
+                            "total_fraud_related": len(fraud_news),
+                            "total_with_companies": len(fraud_news_with_companies),
+                            "stopped_reason": f"Múltiplos erros 403 consecutivos ({MAX_CONSECUTIVE_403_ERRORS})",
+                            "last_file": json_file.name,
+                            "fraud_news": fraud_news
+                        }, f, ensure_ascii=False, indent=2)
+                    save_csv_incremental(csv_file, fraud_news_with_companies)
+                    print("💾 Progresso salvo antes de parar.")
+                    return  # Parar processamento
+                
+                # Continuar para próxima notícia após erro 403
+                continue
             
             # Contar timeouts
             if result.get('execution_time_seconds', 0) >= TIMEOUT_SECONDS - 1:
@@ -539,15 +579,14 @@ def process_all_news(input_dir: str, output_file: str, csv_file: str, metrics_fi
             print(f"   Pessoas: {entry['people']}")
         print(f"   Tipos de Fraude: {entry['fraud_types']}")
         print(f"   Confiança: {entry['confidence']}")
-        print(f"   Resumo: {entry['summary'][:100]}...")
         print()
 
 
 if __name__ == "__main__":
-    INPUT_DIR = "/home/paulo/projects/main-server/.PAULO/983json"
-    OUTPUT_JSON = "/home/paulo/projects/main-server/.PAULO/fraud_detection_results.json"
-    OUTPUT_CSV = "/home/paulo/projects/main-server/.PAULO/fraud_news_with_companies.csv"
-    OUTPUT_METRICS = "/home/paulo/projects/main-server/.PAULO/performance_metrics.json"
+    INPUT_DIR = "/home/paulo/projects/main-server/.PAULO/dataset_building/ndmais_articles_json"
+    OUTPUT_JSON = "/home/paulo/projects/main-server/.PAULO/fraud_detection_ndmais_results.json"
+    OUTPUT_CSV = "/home/paulo/projects/main-server/.PAULO/fraud_news_ndmais_with_companies.csv"
+    OUTPUT_METRICS = "/home/paulo/projects/main-server/.PAULO/performance_metrics_ndmais.json"
     
     print("\n" + "="*70)
     print("DETECTOR DE FRAUDES EMPRESARIAIS EM NOTÍCIAS")
