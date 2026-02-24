@@ -13,7 +13,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama-dev.ceos.ufsc.br")
 SELECTED_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
 LLM_TEMPERATURE = 0
 TIMEOUT_SECONDS = 180  # Timeout de 180 segundos por notícia
-START_FROM = 108518  # Última processada: 108517 (12/fev/2026 18:42) - Retomar daqui
+START_FROM = 0  # Processar desde o início (jornalconexao - novo dataset)
 MAX_CONSECUTIVE_403_ERRORS = 5  # Parar após 5 erros 403 consecutivos
 
 class TimeoutError(Exception):
@@ -583,10 +583,10 @@ def process_all_news(input_dir: str, output_file: str, csv_file: str, metrics_fi
 
 
 if __name__ == "__main__":
-    INPUT_DIR = "/home/paulo/projects/main-server/.PAULO/dataset_building/ndmais_articles_json"
-    OUTPUT_JSON = "/home/paulo/projects/main-server/.PAULO/fraud_detection_ndmais_results.json"
-    OUTPUT_CSV = "/home/paulo/projects/main-server/.PAULO/fraud_news_ndmais_with_companies.csv"
-    OUTPUT_METRICS = "/home/paulo/projects/main-server/.PAULO/performance_metrics_ndmais.json"
+    INPUT_DIR = "/home/paulo/projects/main-server/collector/noticias/downloaded_news/nsc_consolidado"
+    OUTPUT_JSON = "/home/paulo/projects/main-server/.PAULO/fraud_detection_nsc_consolidado_results.json"
+    OUTPUT_CSV = "/home/paulo/projects/main-server/.PAULO/fraud_news_nsc_consolidado_with_companies.csv"
+    OUTPUT_METRICS = "/home/paulo/projects/main-server/.PAULO/performance_metrics_nsc_consolidado.json"
     
     print("\n" + "="*70)
     print("DETECTOR DE FRAUDES EMPRESARIAIS EM NOTÍCIAS")
